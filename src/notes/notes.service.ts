@@ -13,33 +13,40 @@ export class NotesService {
     private notesRepository: Repository<Note>,
   ) {}
 
-  async create(createNoteDto: CreateNoteDto, user: any): Promise<Note> {
-   const note = this.notesRepository.create({ ...createNoteDto, user: { id: user.sub } as User 
-  });
-   return this.notesRepository.save(note);
+  async create(createNoteDto: CreateNoteDto, user: User): Promise<Note> {
+    const note = this.notesRepository.create({
+      ...createNoteDto,
+      user,
+    });
+    return this.notesRepository.save(note);
   }
 
   async findAll(user: User): Promise<Note[]> {
-    if (!user) throw new Error('User not found in request');
-    return this.notesRepository.find({ where: { user: { id: user.id } } });
+    return this.notesRepository.find({
+      where: { user: { id: user.id } }, 
+      relations: ['user'],
+    });
   }
 
   async findOne(id: number, user: User): Promise<Note> {
     const note = await this.notesRepository.findOne({
-      where: { id, user: { id: user.id } },
+      where: { id, user: { id: user.id } }, 
+      relations: ['user'],
     });
-    if (!note) throw new NotFoundException('Note not found');
+    if (!note) {
+      throw new NotFoundException(`Nota con id ${id} no encontrada`);
+    }
     return note;
   }
 
   async update(id: number, updateNoteDto: UpdateNoteDto, user: User): Promise<Note> {
-    const note = await this.findOne(id, user);
+    const note = await this.findOne(id, user); 
     Object.assign(note, updateNoteDto);
     return this.notesRepository.save(note);
   }
 
-  async remove(id: number, user: User): Promise<Note> {
-    const note = await this.findOne(id, user);
-    return this.notesRepository.remove(note);
+  async remove(id: number, user: User): Promise<void> {
+    const note = await this.findOne(id, user); 
+    await this.notesRepository.remove(note);
   }
 }

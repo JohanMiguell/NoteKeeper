@@ -33,7 +33,7 @@ export class User {
     })
     role: UserRole;
 
-    @OneToMany(() => Note, note => note.user)
+    @OneToMany(() => Note, (note) => note.user)
     notes: Note[];
 
 }
