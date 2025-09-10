@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { instanceToPlain } from 'class-transformer';
 
 @Controller('user')
 export class UserController {
@@ -14,12 +15,14 @@ export class UserController {
 
   @Get()
   findAll() {
-    return this.userService.findAll();
+    const user = this.userService.findAll();
+    return instanceToPlain(user);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(Number(id));
+    const user = this.userService.findOne(Number(id));
+    return instanceToPlain(user);
   }
 
   @Patch(':id')
